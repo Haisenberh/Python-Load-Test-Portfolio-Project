@@ -1,0 +1,27 @@
+version: 2
+jobs:
+  run_web_tests:
+    docker: # run the steps with Docker
+      - image: circleci/python:3.9-browsers
+
+    steps: # steps that comprise the `build` job
+      - checkout # check out source code to working directory
+
+      #  Wait for Postgres to be ready before proceeding
+      - run:
+          name: Install needed requirements
+          command:
+            pip install -r requirements.txt --user
+
+      - run:
+          name: Trigger web selenium tests
+          environment: # environment variables for the database url and path to migration files
+            BROWSER: "firefox"
+            HOME_URL: "http://automationpractice.multiformis.com/index.php"
+          command: python3 -m py.test -v -m web_tests --disable-warnings --html=reports/e2e-tests-report.html --self-contained-html
+
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - run_web_tests
